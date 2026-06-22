@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffcf00">
+  <title>Наша неделя</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div>
+        <p class="eyebrow">Семейный план</p>
+        <h1>Наша неделя</h1>
+      </div>
+    </div>
+    <div class="week-controls" aria-label="Переключение недели">
+      <button class="icon-button" id="prev-week" aria-label="Предыдущая неделя">←</button>
+      <button class="week-label" id="today-button">
+        <span id="week-range">22–28 июня</span>
+        <small>Вернуться к этой неделе</small>
+      </button>
+      <button class="icon-button" id="next-week" aria-label="Следующая неделя">→</button>
+    </div>
+    <div class="topbar-actions">
+      <button class="share-button" id="share-week">↗ Поделиться</button>
+      <button class="primary-button" id="open-library"><span>＋</span> Добавить карточку</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section class="planner-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">План без часов</p>
+          <h2>Что будем делать и есть?</h2>
+        </div>
+        <div class="legend" aria-label="Обозначения">
+          <span><i class="legend-dot meal"></i> Еда</span>
+          <span><i class="legend-dot activity"></i> Занятие</span>
+        </div>
+      </div>
+      <div class="week-board" id="week-board" aria-live="polite"></div>
+    </section>
+
+    <aside class="library-panel" id="library-panel">
+      <div class="library-header">
+        <div>
+          <p class="eyebrow">Коллекция</p>
+          <h2>Карточки</h2>
+        </div>
+        <button class="close-button" id="close-library" aria-label="Закрыть">×</button>
+      </div>
+      <p class="library-help">Перетащите карточку в расписание или нажмите на «+» в нужном месте.</p>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="activities" role="tab">Занятия</button>
+        <button class="tab" data-tab="meals" role="tab">Еда</button>
+      </div>
+      <label class="search">
+        <span aria-hidden="true">⌕</span>
+        <input id="library-search" type="search" placeholder="Найти карточку…">
+      </label>
+      <div class="card-library" id="card-library"></div>
+      <button class="secondary-button" id="new-card-button">＋ Создать свою карточку</button>
+    </aside>
+  </main>
+
+  <div class="modal-backdrop" id="picker-modal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow" id="modal-kicker">Добавить в расписание</p>
+          <h2 id="modal-title">Выберите карточку</h2>
+        </div>
+        <button class="close-button" data-close-modal aria-label="Закрыть">×</button>
+      </header>
+      <div class="modal-tabs tabs" id="modal-tabs">
+        <button class="tab active" data-modal-type="activity">Занятие</button>
+        <button class="tab" data-modal-type="meal">Еда</button>
+      </div>
+      <label class="search">
+        <span aria-hidden="true">⌕</span>
+        <input id="modal-search" type="search" placeholder="Начните вводить…">
+      </label>
+      <div class="modal-grid" id="modal-grid"></div>
+      <div class="custom-card-form">
+        <span>Не нашли подходящую?</span>
+        <button class="text-button" id="show-custom-form">Создать свою</button>
+      </div>
+      <form id="custom-card-form" hidden>
+        <label>
+          Название карточки
+          <input id="custom-card-name" maxlength="50" placeholder="Например, прогулка в парке" required>
+        </label>
+        <button class="primary-button" type="submit">Добавить</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="share.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

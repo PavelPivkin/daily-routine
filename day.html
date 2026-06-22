@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#5b34f2">
+  <title>День — Наша неделя</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="day-page">
+  <header class="topbar day-page-topbar">
+    <a class="back-button" id="back-to-week" href="index.html">← <span>Неделя</span></a>
+    <div class="brand day-page-brand">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div><p class="eyebrow">Семейный план</p><h1>Наша неделя</h1></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="share-button" id="share-day">↗ Поделиться</button>
+      <button class="primary-button" id="day-open-library"><span>＋</span> Карточки</button>
+    </div>
+  </header>
+
+  <main class="day-page-main">
+    <article class="expanded-day-card">
+      <header class="expanded-day-header">
+        <button class="day-nav-button" id="day-prev" aria-label="Предыдущий день">←</button>
+        <div>
+          <p class="eyebrow" id="expanded-date"></p>
+          <h1 id="expanded-title"></h1>
+        </div>
+        <button class="day-nav-button" id="day-next" aria-label="Следующий день">→</button>
+      </header>
+      <p class="day-view-help">Большой план дня — без часов и спешки.</p>
+      <div class="expanded-schedule" id="expanded-schedule"></div>
+    </article>
+
+    <aside class="library-panel day-library" id="day-library">
+      <div class="library-header">
+        <div><p class="eyebrow">Коллекция</p><h2>Карточки</h2></div>
+        <button class="close-button" id="day-close-library" aria-label="Закрыть">×</button>
+      </div>
+      <p class="library-help">Перетащите карточку в нужный блок или добавьте через «+».</p>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-day-tab="activity">Занятия</button>
+        <button class="tab" data-day-tab="meal">Еда</button>
+      </div>
+      <label class="search"><span>⌕</span><input id="day-search" type="search" placeholder="Найти карточку…"></label>
+      <div class="card-library" id="day-card-library"></div>
+    </aside>
+  </main>
+
+  <div class="modal-backdrop" id="day-picker" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="day-picker-title">
+      <header class="modal-header">
+        <div><p class="eyebrow">Добавить в план дня</p><h2 id="day-picker-title">Выберите карточку</h2></div>
+        <button class="close-button" id="close-day-picker" aria-label="Закрыть">×</button>
+      </header>
+      <label class="search day-picker-search"><span>⌕</span><input id="day-picker-search" type="search" placeholder="Начните вводить…"></label>
+      <div class="modal-grid" id="day-picker-grid"></div>
+      <form id="day-custom-form">
+        <label>Своя карточка<input id="day-custom-name" maxlength="50" placeholder="Например, прогулка в парке"></label>
+        <button class="primary-button" type="submit">Добавить</button>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="share.js"></script>
+  <script src="day.js"></script>
+</body>
+</html>
