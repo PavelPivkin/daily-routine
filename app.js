@@ -3,7 +3,8 @@ const activities = [
   ["Барабаны", "🥁"], ["Флейта", "♫"], ["Чтение и литература", "📚"],
   ["Математика", "➗"], ["Лепка", "👐"], ["Рисование", "🎨"],
   ["Столярные работы", "🔨"], ["Сборка электроники", "⚡"],
-  ["Поделки из картона", "✂️"], ["Другой проект", "💡"], ["Природоведение", "🌿"]
+  ["Поделки из картона", "✂️"], ["Другой проект", "💡"], ["Природоведение", "🌿"],
+  ["Зарядка", "☀️"], ["Просмотр мультфильма", "📺"]
 ].map(([name, icon], index) => ({ id: `a-${index}`, name, icon, type: "activity" }));
 
 const meals = [
@@ -19,6 +20,7 @@ const meals = [
 ].map(([name, icon], index) => ({ id: `m-${index}`, name, icon, type: "meal" }));
 
 const slotDefinitions = [
+  { id: "beforeBreakfast", label: "До завтрака", type: "activity", hint: "Добавить занятие" },
   { id: "breakfast", label: "Завтрак", type: "meal", hint: "Что на завтрак?" },
   { id: "morningActivity", label: "До обеда", type: "activity", hint: "Добавить занятие" },
   { id: "lunch", label: "Обед", type: "meal", hint: "Что на обед?" },
