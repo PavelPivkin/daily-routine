@@ -13,7 +13,9 @@
       const binary = atob(padded);
       const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
       const payload = JSON.parse(new TextDecoder().decode(bytes));
-      if (payload?.version !== 1 || !payload.weekStart || typeof payload.schedule !== "object") return null;
+      const weekStart = payload.weekStart || payload.w;
+      const schedule = payload.schedule || payload.s;
+      if (![1, 2].includes(payload?.version) || !weekStart || typeof schedule !== "object") return null;
       return payload;
     } catch {
       return null;

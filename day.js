@@ -29,7 +29,7 @@ const slots = [
 const params = new URLSearchParams(location.search);
 const sharedPlan = params.get("plan") ? FamilyShare.decode(params.get("plan")) : null;
 let currentDate = validDate(params.get("date")) ? params.get("date") : new Date().toISOString().slice(0,10);
-const weekStart = sharedPlan?.weekStart || (validDate(params.get("week")) ? params.get("week") : mondayKey(currentDate));
+const weekStart = sharedPlan?.weekStart || sharedPlan?.w || (validDate(params.get("week")) ? params.get("week") : mondayKey(currentDate));
 let schedule = {};
 let pickerTarget = null;
 let activeLibraryType = "activity";
@@ -43,10 +43,15 @@ function mondayKey(value) {
 function storageKey() { return `family-planner:${weekStart}`; }
 function load() {
   if (sharedPlan) {
-    schedule = sharedPlan.schedule || {};
+    const sharedCustomCards = sharedPlan.customCards || sharedPlan.c || [];
+    sharedCustomCards.forEach(card => {
+      const list = card.type === "meal" ? mealCards : activityCards;
+      if (!list.some(item=>item.id===card.id)) list.push(card);
+    });
+    schedule = expandSharedSchedule(sharedPlan.schedule || sharedPlan.s || {});
     localStorage.setItem(storageKey(), JSON.stringify(schedule));
-    if (sharedPlan.customCards?.length) {
-      localStorage.setItem("family-planner:custom-cards", JSON.stringify(sharedPlan.customCards));
+    if (sharedCustomCards.length) {
+      localStorage.setItem("family-planner:custom-cards", JSON.stringify(sharedCustomCards));
     }
   } else {
     try { schedule = JSON.parse(localStorage.getItem(storageKey())) || {}; } catch { schedule = {}; }
@@ -60,12 +65,44 @@ function load() {
 }
 function save() { localStorage.setItem(storageKey(), JSON.stringify(schedule)); }
 function cardsFor(type) { return type === "meal" ? mealCards : activityCards; }
+function createInstanceId() { return `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+function compactSchedule(source) {
+  const result = {};
+  Object.entries(source).forEach(([day, slots]) => {
+    result[day] = {};
+    Object.entries(slots || {}).forEach(([slot, cards]) => {
+      result[day][slot] = (cards || []).map(card => card.id || card);
+    });
+  });
+  return result;
+}
+function expandSharedSchedule(source) {
+  const cardById = new Map([...activityCards,...mealCards].map(card=>[card.id,card]));
+  const result = {};
+  Object.entries(source).forEach(([day, slots]) => {
+    result[day] = {};
+    Object.entries(slots || {}).forEach(([slot, cards]) => {
+      result[day][slot] = (cards || []).map(card => {
+        if (typeof card === "string") {
+          const sourceCard = cardById.get(card);
+          return sourceCard ? {...sourceCard,instanceId:createInstanceId()} : null;
+        }
+        if (!Array.isArray(card)) return card;
+        const [id, instanceId] = card;
+        const sourceCard = cardById.get(id);
+        return sourceCard ? {...sourceCard,instanceId:instanceId || createInstanceId()} : null;
+      }).filter(Boolean);
+    });
+  });
+  return result;
+}
 function sharePayload() {
+  const customCards = [...activityCards,...mealCards].filter(card=>String(card.id).startsWith("custom-"));
   return {
-    version: 1,
-    weekStart,
-    schedule,
-    customCards: [...activityCards,...mealCards].filter(card=>String(card.id).startsWith("custom-"))
+    version: 2,
+    w: weekStart,
+    s: compactSchedule(schedule),
+    c: customCards
   };
 }
 function shareDay() {
@@ -147,7 +184,7 @@ function handleDrop(event,slot) {
 function addCard(slotId,card) {
   schedule[currentDate] ||= {};
   schedule[currentDate][slotId] ||= [];
-  schedule[currentDate][slotId].push({...card,instanceId:`${Date.now()}-${Math.random().toString(16).slice(2)}`});
+  schedule[currentDate][slotId].push({...card,instanceId:createInstanceId()});
   save(); render(); closePicker(); showToast("Добавлено в план дня");
 }
 function removeCard(slotId,id,rerender=true) {

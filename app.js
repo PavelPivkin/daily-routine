@@ -86,15 +86,16 @@ function loadWeek() {
 function applySharedPlan() {
   const shared = sharedPayloadFromUrl();
   if (!shared) return false;
-  state.weekStart = startOfWeek(new Date(`${shared.weekStart}T12:00:00`));
-  state.schedule = shared.schedule || {};
-  localStorage.setItem(storageKey(), JSON.stringify(state.schedule));
-  (shared.customCards || []).forEach(card => {
+  const sharedCustomCards = shared.customCards || shared.c || [];
+  state.weekStart = startOfWeek(new Date(`${(shared.weekStart || shared.w)}T12:00:00`));
+  sharedCustomCards.forEach(card => {
     const list = card.type === "activity" ? activities : meals;
     if (!list.some(item => item.id === card.id)) list.push(card);
   });
-  if (shared.customCards?.length) {
-    localStorage.setItem("family-planner:custom-cards", JSON.stringify(shared.customCards));
+  state.schedule = expandSharedSchedule(shared.schedule || shared.s || {});
+  localStorage.setItem(storageKey(), JSON.stringify(state.schedule));
+  if (sharedCustomCards.length) {
+    localStorage.setItem("family-planner:custom-cards", JSON.stringify(sharedCustomCards));
   }
   return true;
 }
@@ -116,12 +117,49 @@ function saveCustomCards() {
   localStorage.setItem("family-planner:custom-cards", JSON.stringify(customCards));
 }
 
+function createInstanceId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function compactSchedule(schedule) {
+  const result = {};
+  Object.entries(schedule).forEach(([day, slots]) => {
+    result[day] = {};
+    Object.entries(slots || {}).forEach(([slot, cards]) => {
+      result[day][slot] = (cards || []).map(card => card.id || card);
+    });
+  });
+  return result;
+}
+
+function expandSharedSchedule(schedule) {
+  const cardById = new Map([...activities, ...meals].map(card => [card.id, card]));
+  const result = {};
+  Object.entries(schedule).forEach(([day, slots]) => {
+    result[day] = {};
+    Object.entries(slots || {}).forEach(([slot, cards]) => {
+      result[day][slot] = (cards || []).map(card => {
+        if (typeof card === "string") {
+          const source = cardById.get(card);
+          return source ? { ...source, instanceId: createInstanceId() } : null;
+        }
+        if (!Array.isArray(card)) return card;
+        const [id, instanceId] = card;
+        const source = cardById.get(id);
+        return source ? { ...source, instanceId: instanceId || createInstanceId() } : null;
+      }).filter(Boolean);
+    });
+  });
+  return result;
+}
+
 function sharePayload() {
+  const customCards = [...activities, ...meals].filter(card => String(card.id).startsWith("custom-"));
   return {
-    version: 1,
-    weekStart: weekKey(),
-    schedule: state.schedule,
-    customCards: [...activities, ...meals].filter(card => String(card.id).startsWith("custom-"))
+    version: 2,
+    w: weekKey(),
+    s: compactSchedule(state.schedule),
+    c: customCards
   };
 }
 
@@ -291,7 +329,7 @@ function addCard(day, slot, sourceCard) {
   state.schedule[day][slot] ||= [];
   state.schedule[day][slot].push({
     ...sourceCard,
-    instanceId: `${Date.now()}-${Math.random().toString(16).slice(2)}`
+    instanceId: createInstanceId()
   });
   saveWeek();
   renderBoard();
